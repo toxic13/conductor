@@ -84,6 +84,7 @@ public class RetryUtil<T> {
      *                          <li>And a reference to the original exception generated during the last {@link Attempt} of the retry</li>
      *                          </ul>
      */
+    @SuppressWarnings("Guava")
     public T retryOnException(Supplier<T> supplierCommand,
                               Predicate<Throwable> throwablePredicate,
                               Predicate<T> resultRetryPredicate,

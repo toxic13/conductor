@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +131,6 @@ public class WorkflowExecutor {
 
         try {
             //Check if the input to the workflow is not null
-            //QQ When is the payload of the input validated
             if (workflowInput == null) {
                 logger.error("The input for the workflow {} cannot be NULL", workflowName);
                 throw new ApplicationException(INVALID_INPUT, "NULL input passed when starting workflow");
@@ -569,7 +569,6 @@ public class WorkflowExecutor {
 
         //If it is a new workflow the tasks will be still empty even though include tasks is true
         Workflow workflow = executionDAO.getWorkflow(workflowId, true);
-        //QQ the definition can be null here
         WorkflowDef def = metadataDAO.get(workflow.getWorkflowType(), workflow.getVersion());
 
         try {
@@ -681,7 +680,7 @@ public class WorkflowExecutor {
             theTask.setInputData(skipTaskRequest.getTaskInput());
             theTask.setOutputData(skipTaskRequest.getTaskOutput());
         }
-        executionDAO.createTasks(Arrays.asList(theTask));
+        executionDAO.createTasks(Collections.singletonList(theTask));
         decide(workflowId);
     }
 
@@ -693,7 +692,7 @@ public class WorkflowExecutor {
     public void addTaskToQueue(Task task) throws Exception {
         // put in queue
         String taskQueueName = QueueUtils.getQueueName(task);
-        queueDAO.remove(taskQueueName, task.getTaskId()); //QQ why do we need to remove the existing task ??
+        queueDAO.remove(taskQueueName, task.getTaskId());
         if (task.getCallbackAfterSeconds() > 0) {
             queueDAO.push(taskQueueName, task.getTaskId(), task.getCallbackAfterSeconds());
         } else {
@@ -811,7 +810,7 @@ public class WorkflowExecutor {
                 .filter(Objects::nonNull)
                 .filter(validateLastPolledTime)
                 .findFirst()
-                .map(PollData::getDomain) //QQ is the domain saved in the executionDAO same as the domain passed in ??
+                .map(PollData::getDomain)
                 .orElse(null);
     }
 
